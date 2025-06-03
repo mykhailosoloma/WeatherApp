@@ -26,6 +26,9 @@
     <Button fx:id="filterButton" onAction="#onFilterHotCities" prefHeight="25.0" prefWidth="160.0"
             styleClass="button" text="Тільки > 25°C"/>
 
+    <Button fx:id="clearCacheButton" onAction="#onClearCache" prefHeight="25.0" prefWidth="160.0"
+            styleClass="button" text="Очистити кеш"/>
+
     <ListView fx:id="cityList" onMouseClicked="#onCitySelect"
               prefHeight="100.0" prefWidth="200.0"/>
 

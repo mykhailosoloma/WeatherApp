@@ -35,6 +35,10 @@ public class Memoizer<K, V> {
         cache.remove(key);
     }
 
+    public void clearCache() {
+        cache.clear();
+    }
+
     private boolean isValid(CacheEntry<V> entry) {
         return Duration.between(entry.timestamp(), Instant.now()).compareTo(expiration) <= 0;
     }

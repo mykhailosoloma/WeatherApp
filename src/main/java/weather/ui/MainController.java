@@ -180,4 +180,10 @@ public class MainController {
                 return null;
             });
     }
+
+    @FXML
+    private void onClearCache() {
+        service.clearCache();
+        resultLabel.setText("Кеш очищено");
+    }
 }

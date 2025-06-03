@@ -48,4 +48,8 @@ public class WeatherCache {
                     return weatherData;
                 });
     }
+
+    public void clearCache() {
+        cache.clearCache();
+    }
 }

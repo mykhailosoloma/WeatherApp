@@ -88,6 +88,10 @@ public class WeatherService {
         }
     }
 
+    public void clearCache() {
+        cache.clearCache();
+    }
+
     public void shutdown() {
         try {
             scheduler.shutdown();
