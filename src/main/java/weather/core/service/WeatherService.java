@@ -97,6 +97,8 @@ public class WeatherService {
                     System.err.println("Scheduler did not terminate");
                 }
             }
+
+            proxy.shutdown();
         } catch (InterruptedException ie) {
             scheduler.shutdownNow();
             Thread.currentThread().interrupt();
