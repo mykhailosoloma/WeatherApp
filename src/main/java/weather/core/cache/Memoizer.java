@@ -45,4 +45,11 @@ public class Memoizer<K, V> {
 
     private record CacheEntry<V>(V value, Instant timestamp) {
     }
+    public void clearExpired() {
+        Instant now = Instant.now();
+        cache.entrySet().removeIf(entry ->
+                Duration.between(entry.getValue().timestamp(), now).compareTo(expiration) > 0
+        );
+    }
+
 }

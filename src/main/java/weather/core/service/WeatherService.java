@@ -20,46 +20,63 @@ public class WeatherService {
     private static final Duration DEFAULT_CACHE_EXPIRATION = Duration.ofDays(1);
     private static final long DEFAULT_UPDATE_INTERVAL_HOURS = 12;
     private static final int DEFAULT_TOP_CITIES_COUNT = 5;
+
     public WeatherService() {
         this(DEFAULT_CACHE_EXPIRATION, DEFAULT_UPDATE_INTERVAL_HOURS);
     }
+
     public WeatherService(Duration cacheExpiration, long updateIntervalHours) {
         this.cache = new WeatherCache(cacheExpiration);
         this.cityQueue = new CityPriorityQueue();
-        this.scheduler = Executors.newScheduledThreadPool(1);
+        this.scheduler = Executors.newScheduledThreadPool(2); // Збільшено на 2 потоки
+
+        // Планове оновлення
         scheduler.scheduleAtFixedRate(
-            this::updateWeatherForTopCities,
-            1,
-            updateIntervalHours * 60 * 60,
-            TimeUnit.SECONDS
+                this::updateWeatherForTopCities,
+                1,
+                updateIntervalHours * 60 * 60,
+                TimeUnit.SECONDS
+        );
+
+        // Планове очищення кешу
+        scheduler.scheduleAtFixedRate(
+                cache::clearExpired,
+                0,
+                1,
+                TimeUnit.HOURS
         );
     }
+
     public CompletableFuture<WeatherData> getWeatherAsync(String city) {
         if (!cityQueue.contains(city)) {
             cityQueue.addCity(city);
         }
         return cache.computeWeatherDataAsync(city, this::fetchWeatherAsyncForCity)
-            .thenApply(data -> {
-                cityQueue.updatePriority(city);
-                return data;
-            });
+                .thenApply(data -> {
+                    cityQueue.updatePriority(city);
+                    return data;
+                });
     }
+
     private CompletableFuture<WeatherData> fetchWeatherAsyncForCity(String city) {
         return proxy.fetchWeatherAsync(city);
     }
+
     public CompletableFuture<List<WeatherData>> getGroupWeatherAsync(List<String> cities) {
         List<CompletableFuture<WeatherData>> futures = cities.stream()
-            .map(this::getWeatherAsync)
-            .toList();
+                .map(this::getWeatherAsync)
+                .toList();
 
         return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
-            .thenApply(v -> futures.stream()
-                .map(CompletableFuture::join)
-                .toList());
+                .thenApply(v -> futures.stream()
+                        .map(CompletableFuture::join)
+                        .toList());
     }
+
     public void updateWeatherForTopCities() {
         updateWeatherForTopCities(DEFAULT_TOP_CITIES_COUNT);
     }
+
     public void updateWeatherForTopCities(int n) {
         List<String> topCities = cityQueue.getTopNCities(n);
         if (topCities.isEmpty()) {
@@ -73,15 +90,15 @@ public class WeatherService {
 
             if (!cache.hasFreshData(city)) {
                 proxy.fetchWeatherAsync(city)
-                    .thenAccept(data -> {
-                        cache.putWeatherData(city, data);
-                        cityQueue.addCity(city);
-                    })
-                    .exceptionally(ex -> {
-                        cityQueue.addCity(city, Instant.EPOCH);
-                        System.err.println("Error updating weather for " + city + ": " + ex.getMessage());
-                        return null;
-                    });
+                        .thenAccept(data -> {
+                            cache.putWeatherData(city, data);
+                            cityQueue.addCity(city);
+                        })
+                        .exceptionally(ex -> {
+                            cityQueue.addCity(city, Instant.EPOCH);
+                            System.err.println("Error updating weather for " + city + ": " + ex.getMessage());
+                            return null;
+                        });
             } else {
                 cityQueue.addCity(city);
             }

@@ -52,4 +52,8 @@ public class WeatherCache {
     public void clearCache() {
         cache.clearCache();
     }
+    public void clearExpired() {
+        cache.clearExpired();
+    }
+
 }
