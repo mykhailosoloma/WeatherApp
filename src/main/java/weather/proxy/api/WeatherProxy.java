@@ -110,7 +110,6 @@ public class WeatherProxy {
             throw e;
         }
     }
-
     public CompletableFuture<WeatherData> fetchWeatherAsync(String cityNameInput) {
         return CompletableFuture.supplyAsync(() -> {
             try {
@@ -155,4 +154,7 @@ public class WeatherProxy {
             return name;
         }
     }
+
+
+
 }
