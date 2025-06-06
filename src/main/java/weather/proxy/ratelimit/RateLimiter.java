@@ -38,20 +38,6 @@ public class RateLimiter {
         releaseThread.start();
     }
 
-    public boolean acquire(Duration timeout) {
-        try {
-            boolean acquired = semaphore.tryAcquire(timeout.toMillis(), TimeUnit.MILLISECONDS);
-            if (!acquired) {
-                LOGGER.warning("Rate limit exceeded, request delayed");
-            }
-            return acquired;
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            LOGGER.warning("Interrupted while waiting for rate limit");
-            return false;
-        }
-    }
-
     public void acquire() {
         try {
             semaphore.acquire();

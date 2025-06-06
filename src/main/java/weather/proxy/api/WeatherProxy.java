@@ -1,24 +1,25 @@
 package weather.proxy.api;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import weather.core.model.WeatherData;
 import weather.proxy.auth.ApiKeyAuthStrategy;
 import weather.proxy.auth.AuthorizationStrategy;
 import weather.proxy.logging.ProxyLogger;
 import weather.proxy.ratelimit.RateLimiter;
-import java.io.InputStream;
+import weather.util.LargeDataProcessor;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.file.Path;
 import java.time.Duration;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
+import java.util.stream.Stream;
 
 public class WeatherProxy {
     private static final String DEFAULT_API_KEY = "f308b13bd984ce97bbfd2be4d45c1872";
@@ -58,21 +59,17 @@ public class WeatherProxy {
     }
 
     private void loadCityList() {
-        try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream("city.list.json")) {
-            if (inputStream == null) {
-                throw new RuntimeException("city.list.json not found");
-            }
+        try (Stream<ObjectNode> stream = LargeDataProcessor.streamJsonArrayFile(
+                Path.of("src/main/resources/city.list.json"))) {
 
-            List<City> cities = objectMapper.readValue(inputStream, new TypeReference<>() {
-            });
-            for (City city : cities) {
-                cityIdMap.put(city.getName().toLowerCase(), city.getId());
-            }
+            stream.map(node -> objectMapper.convertValue(node, City.class))
+                    .forEach(city -> cityIdMap.put(city.getName().toLowerCase(), city.getId()));
 
         } catch (Exception e) {
             throw new RuntimeException("Failed to load city list", e);
         }
     }
+
 
     public WeatherData fetchWeather(String cityNameInput) throws Exception {
         Integer cityId = cityIdMap.get(cityNameInput.toLowerCase());

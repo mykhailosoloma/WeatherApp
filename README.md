@@ -11,6 +11,7 @@ A modern, feature-rich weather application built with Java and JavaFX that provi
 - **Hot Cities Filter**: Filter cities with temperatures above a defined threshold  
 - **Smart Caching**: Efficiently cache weather data to reduce API calls and boost performance  
 - **Automatic Updates**: Background updates for frequently accessed cities  
+- **Large Data Processing**: Process large datasets efficiently using Streams and Async Iterators  
 
 ## Architecture
 
@@ -22,6 +23,7 @@ The application follows a clean architecture with clear separation of concerns:
 - **Service**: Business logic for retrieving and processing weather data  
 - **Cache**: Efficient caching system with expiration policies  
 - **Queue**: Priority queue for managing city update priorities  
+- **Large Data Processing**: Utilities for memory-efficient processing of large datasets  
 
 ### UI Components
 
@@ -55,12 +57,16 @@ src/main/java/weather/
 │ ├── model/ # Data models
 │ ├── queue/ # Priority queue implementation
 │ └── service/ # Business logic services
+├── examples/ # Example implementations
+│ ├── LargeDataProcessingExample.java # Demonstrates large data processing
+│ └── LargeDataProcessingTest.java # Tests for large data processing
 ├── proxy/
 │ └── api/ # External API integration
 ├── ui/ # User interface components
 │ ├── controllers/ # UI controllers
 │ └── views/ # FXML view definitions
 └── util/ # Utility classes
+  └── LargeDataProcessor.java # Utilities for processing large datasets
 
 ## Dependencies
 
@@ -70,4 +76,3 @@ src/main/java/weather/
 ## License
 
 This project is open source and available under the MIT License.
-
